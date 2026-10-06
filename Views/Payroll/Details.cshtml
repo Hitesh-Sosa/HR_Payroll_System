@@ -1,0 +1,74 @@
+@model HrPayrollSystem.Models.Payslip
+@{
+    ViewData["Title"] = "Payslip";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-2">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">HrPayrollSystem — Payslip</h4>
+                <small>@(new DateTime(Model.Year, Model.Month, 1).ToString("MMMM yyyy"))</small>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>@Model.Employee?.FullName</strong> (@Model.Employee?.EmployeeCode)<br />
+                        <span class="text-muted">@Model.Employee?.Designation</span><br />
+                        <span class="text-muted">@Model.Employee?.Department?.Name</span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <div>Working Days: <strong>@Model.WorkingDays</strong></div>
+                        <div>LOP: <strong>@Model.LopDays.ToString("0.##")</strong></div>
+                        <div>Paid Days: <strong>@Model.PaidDays.ToString("0.##")</strong></div>
+                    </div>
+                </div>
+
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr><th>Earnings</th><th class="text-end">Amount (Rs.)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Basic</td><td class="text-end">@Model.EarnedBasic.ToString("N2")</td></tr>
+                        <tr><td>HRA</td><td class="text-end">@Model.EarnedHra.ToString("N2")</td></tr>
+                        <tr><td>Conveyance</td><td class="text-end">@Model.EarnedConveyance.ToString("N2")</td></tr>
+                        <tr><td>Special Allowance</td><td class="text-end">@Model.EarnedSpecial.ToString("N2")</td></tr>
+                        <tr class="table-light">
+                            <td><strong>Gross Earned</strong></td>
+                            <td class="text-end"><strong>@Model.EarnedGross.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr><th>Deductions</th><th class="text-end">Amount (Rs.)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Provident Fund (12% of earned Basic)</td><td class="text-end">@Model.PfDeduction.ToString("N2")</td></tr>
+                        <tr><td>Professional Tax</td><td class="text-end">@Model.ProfessionalTax.ToString("N2")</td></tr>
+                        <tr class="table-light">
+                            <td><strong>Total Deductions</strong></td>
+                            <td class="text-end"><strong>@Model.TotalDeductions.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="alert alert-primary text-center fs-4 mb-0">
+                    NET PAY: <strong>@Model.NetPay.ToString("N2")</strong>
+                </div>
+            </div>
+            <div class="card-footer text-muted text-center small">
+                Generated on @Model.GeneratedOn.ToLocalTime().ToString("dd MMM yyyy, HH:mm") — System generated
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a class="btn btn-primary"
+               asp-controller="Payroll" asp-action="DownloadPdf" asp-route-id="@Model.Id">⬇ Download PDF</a>
+            <button onclick="window.print()" class="btn btn-outline-primary">🖨 Print</button>
+            <a class="btn btn-outline-secondary"
+               asp-controller="Payroll" asp-action="@(User.IsInRole("Admin") ? "Index" : "MyPayslips")">← Back</a>
+        </div>
+    </div>
+</div>

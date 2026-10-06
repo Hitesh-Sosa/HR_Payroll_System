@@ -1,0 +1,28 @@
+﻿@model List<HrPayrollSystem.Models.Payslip>
+@{ ViewData["Title"] = "My Payslips"; }
+
+<h2 class="mb-4">My Payslips</h2>
+
+<table class="table table-striped table-bordered align-middle">
+    <thead><tr><th>Month</th><th>Paid Days</th><th>Gross Earned</th><th>Deductions</th><th>Net Pay</th><th></th></tr></thead>
+    <tbody>
+    @if (!Model.Any())
+    {
+        <tr><td colspan="6" class="text-muted">No payslips yet â€” they appear after admin runs payroll.</td></tr>
+    }
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@(new DateTime(p.Year, p.Month, 1).ToString("MMMM yyyy"))</td>
+            <td>@p.PaidDays.ToString("0.##") / @p.WorkingDays</td>
+            <td>@p.EarnedGross.ToString("N2")</td>
+            <td>@p.TotalDeductions.ToString("N2")</td>
+            <td><strong>@p.NetPay.ToString("N2")</strong></td>
+            <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   asp-controller="Payroll" asp-action="Details" asp-route-id="@p.Id">View</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

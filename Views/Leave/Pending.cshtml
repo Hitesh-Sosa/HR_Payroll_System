@@ -1,0 +1,39 @@
+@model List<HrPayrollSystem.Models.LeaveRequest>
+@{ ViewData["Title"] = "Approve Leaves"; }
+
+<h2 class="mb-4">Pending Leave Requests</h2>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<table class="table table-striped table-bordered align-middle">
+    <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Action</th></tr></thead>
+    <tbody>
+    @if (!Model.Any())
+    {
+        <tr><td colspan="7" class="text-muted">No pending requests. 🎉</td></tr>
+    }
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td>@r.Employee?.FullName (@r.Employee?.EmployeeCode)</td>
+            <td>@r.LeaveType?.Name</td>
+            <td>@r.StartDate.ToString("dd MMM yyyy")</td>
+            <td>@r.EndDate.ToString("dd MMM yyyy")</td>
+            <td>@r.NumberOfDays.ToString("0.##")</td>
+            <td>@r.Reason</td>
+            <td>
+                <form asp-controller="Leave" asp-action="Approve" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <input type="text" name="remarks" placeholder="remarks" class="form-control d-inline-block w-auto me-1" />
+                    <button type="submit" class="btn btn-success btn-sm">✅ Approve</button>
+                </form>
+                <form asp-controller="Leave" asp-action="Reject" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <button type="submit" class="btn btn-danger btn-sm">❌ Reject</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

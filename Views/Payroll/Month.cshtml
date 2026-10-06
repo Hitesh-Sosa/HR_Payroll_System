@@ -1,0 +1,41 @@
+﻿@model List<HrPayrollSystem.Models.Payslip>
+@{ ViewData["Title"] = "Payslips"; }
+
+<h2 class="mb-4">
+    Payslips â€” @(new DateTime((int)ViewBag.Year, (int)ViewBag.Month, 1).ToString("MMMM yyyy"))
+</h2>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+
+<table class="table table-striped table-bordered align-middle">
+    <thead>
+        <tr>
+            <th>Employee</th><th>Working Days</th><th>LOP</th><th>Paid Days</th>
+            <th>Earned Gross</th><th>Deductions</th><th>Net Pay</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (!Model.Any())
+    {
+        <tr><td colspan="8" class="text-muted">No payslips for this month.</td></tr>
+    }
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Employee?.FullName (@p.Employee?.EmployeeCode)</td>
+            <td>@p.WorkingDays</td>
+            <td>@p.LopDays.ToString("0.##")</td>
+            <td>@p.PaidDays.ToString("0.##")</td>
+            <td>@p.EarnedGross.ToString("N2")</td>
+            <td>@p.TotalDeductions.ToString("N2")</td>
+            <td><strong>@p.NetPay.ToString("N2")</strong></td>
+            <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   asp-controller="Payroll" asp-action="Details" asp-route-id="@p.Id">View</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a class="btn btn-outline-secondary" asp-controller="Payroll" asp-action="Index">â† Back to Payroll</a>

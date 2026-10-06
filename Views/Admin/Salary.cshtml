@@ -1,0 +1,41 @@
+@model HrPayrollSystem.Models.SalaryFormViewModel
+@{ ViewData["Title"] = "Salary Structure"; }
+
+<h2 class="mb-1">Salary Structure</h2>
+<p class="text-muted">For: <strong>@Model.EmployeeName</strong></p>
+
+<div class="row">
+    <div class="col-md-6">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+        <form asp-controller="Admin" asp-action="Salary" method="post">
+            <input type="hidden" asp-for="EmployeeId" />
+            <input type="hidden" asp-for="EmployeeName" />
+
+            <div class="mb-3">
+                <label class="form-label">Basic</label>
+                <input asp-for="Basic" type="number" step="0.01" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">HRA</label>
+                <input asp-for="HRA" type="number" step="0.01" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Conveyance</label>
+                <input asp-for="Conveyance" type="number" step="0.01" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Special Allowance</label>
+                <input asp-for="SpecialAllowance" type="number" step="0.01" class="form-control" />
+            </div>
+
+            <div class="alert alert-info py-2">
+                💡 <strong>Rule:</strong> Basic + HRA + Conveyance + Special = the employee's Gross Monthly Salary (exactly).
+                Suggested split for 50000: Basic 25000 + HRA 10000 + Conv 2000 + Special 13000.
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Salary Structure</button>
+            <a class="btn btn-outline-secondary" asp-controller="Admin" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>

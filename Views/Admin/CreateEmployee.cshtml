@@ -1,0 +1,82 @@
+@model HrPayrollSystem.Models.CreateEmployeeViewModel
+@{ ViewData["Title"] = "Create Employee"; }
+
+<h2 class="mb-3">Create Employee</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+        <form asp-controller="Admin" asp-action="CreateEmployee" method="post">
+            <div class="card mb-3"><div class="card-body">
+                <h5>Employee Details</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Employee Code</label>
+                        <input asp-for="EmployeeCode" class="form-control" placeholder="EMP002" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Designation</label>
+                        <input asp-for="Designation" class="form-control" placeholder="Software Developer" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Department</label>
+                        <select asp-for="DepartmentId" class="form-select" required>
+                            <option value="">-- choose --</option>
+                            @foreach (var d in (List<HrPayrollSystem.Models.Department>)ViewBag.Departments)
+                            {
+                                <option value="@d.Id">@d.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Joining Date</label>
+                        <input asp-for="JoiningDate" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Gross Monthly Salary</label>
+                        <input asp-for="GrossMonthlySalary" type="number" step="0.01" class="form-control" />
+                    </div>
+                </div>
+            </div></div>
+
+            <div class="card mb-3"><div class="card-body">
+                <h5>Login Account</h5>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="LinkExistingUser" value="true" checked
+                           onchange="document.getElementById('linkSection').style.display='block';
+                                     document.getElementById('newSection').style.display='none';" />
+                    <label class="form-check-label">Link an EXISTING user account</label>
+                </div>
+                <div id="linkSection" class="ms-4 mb-3">
+                    <select asp-for="SelectedUserId" class="form-select w-75">
+                        <option value="">-- choose registered user --</option>
+                        @foreach (var u in (List<HrPayrollSystem.Data.ApplicationUser>)ViewBag.UnlinkedUsers)
+                        {
+                            <option value="@u.Id">@u.Email</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="LinkExistingUser" value="false"
+                           onchange="document.getElementById('linkSection').style.display='none';
+                                     document.getElementById('newSection').style.display='block';" />
+                    <label class="form-check-label">CREATE a new user account</label>
+                </div>
+                <div id="newSection" class="ms-4" style="display:none">
+                    <input asp-for="NewEmail" type="email" class="form-control w-75 mb-2" placeholder="new.user@company.com" />
+                    <input asp-for="NewPassword" type="password" class="form-control w-75" placeholder="password (8+ chars, Aa1!)" />
+                </div>
+            </div></div>
+
+            <button type="submit" class="btn btn-primary btn-lg">Create Employee</button>
+            <a class="btn btn-outline-secondary btn-lg" asp-controller="Admin" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>

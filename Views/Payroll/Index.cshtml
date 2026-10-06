@@ -1,0 +1,55 @@
+﻿@model List<HrPayrollSystem.Services.MonthSummary>
+@{ ViewData["Title"] = "Payroll"; }
+
+<h2 class="mb-4">Payroll</h2>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<div class="card mb-4"><div class="card-body">
+    <h5>Run Payroll for a Month</h5>
+    <p class="text-muted mb-2">
+        Uses each employee's attendance + approved leaves + salary structure.
+        Skips employees without a salary structure. One run per month.
+    </p>
+    <form asp-controller="Payroll" asp-action="Run" method="post" class="row g-2">
+        <div class="col-auto">
+            <select name="month" class="form-select" required>
+                @for (int m = 1; m <= 12; m++)
+                {
+                    <option value="@m" selected="@(m == DateTime.Now.Month)">@(new DateTime(2000, m, 1).ToString("MMMM"))</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <input type="number" name="year" class="form-control" value="@DateTime.Now.Year" min="2020" max="2100" required />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">â–¶ Run Payroll</button>
+        </div>
+    </form>
+</div></div>
+
+<h5>Processed Months</h5>
+<table class="table table-striped w-auto">
+    <thead><tr><th>Month</th><th>Payslips</th><th>Total Net Pay</th><th></th></tr></thead>
+    <tbody>
+    @if (!Model.Any())
+    {
+        <tr><td colspan="4" class="text-muted">No payroll processed yet.</td></tr>
+    }
+    @foreach (var m in Model)
+    {
+        <tr>
+            <td>@(new DateTime(m.Year, m.Month, 1).ToString("MMMM yyyy"))</td>
+            <td>@m.PayslipCount</td>
+            <td>@m.TotalNetPay.ToString("N2")</td>
+            <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   asp-controller="Payroll" asp-action="Month"
+                   asp-route-year="@m.Year" asp-route-month="@m.Month">View Payslips</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
