@@ -1,0 +1,72 @@
+﻿@model HrPayrollSystem.Models.HrDashboardViewModel
+@{ ViewData["Title"] = "HR Dashboard"; }
+
+<h2 class="mb-4 fw-bold">&#128203; HR Dashboard</h2>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #4f46e5"><div class="fs-2">&#128101;</div><h3 class="mb-0 fw-bold">@Model.ActiveEmployees</h3><small class="text-muted">Active Employees</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #f59e0b"><div class="fs-2">&#9888;&#65039;</div><h3 class="mb-0 fw-bold">@Model.UnlinkedUsersCount</h3><small class="text-muted">Unlinked Accounts</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #a855f7"><div class="fs-2">&#127795;</div><h3 class="mb-0 fw-bold">@Model.PendingLeaves</h3><small class="text-muted">Pending Leaves</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #22c55e"><div class="fs-2">&#128197;</div><h3 class="mb-0 fw-bold">@Model.HolidaysThisMonth</h3><small class="text-muted">Holidays This Month</small></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm p-3 mb-4">
+            <h6 class="fw-bold mb-2">&#128202; Attendance This Month</h6>
+            <canvas id="hrChart" height="110"></canvas>
+        </div>
+        <div class="card border-0 shadow-sm p-3">
+            <h6 class="fw-bold mb-2">&#128196; View Payslips (read-only)</h6>
+            <form asp-controller="Payroll" asp-action="Month" method="get" class="row g-2">
+                <div class="col-auto">
+                    <select name="month" class="form-select form-select-sm">
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(m == DateTime.Now.Month)">@(new DateTime(2000, m, 1).ToString("MMMM"))</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-auto"><input type="number" name="year" class="form-control form-control-sm" value="@DateTime.Now.Year" /></div>
+                <div class="col-auto"><button class="btn btn-sm btn-primary">Open</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm p-3">
+            <h6 class="fw-bold mb-2">&#127795; Pending Leaves - approve or reject</h6>
+            @if (!Model.PendingLeaveRequests.Any()) { <p class="text-muted small mb-0">No pending requests. All clear!</p> }
+            @foreach (var r in Model.PendingLeaveRequests)
+            {
+                <div class="border-bottom pb-2 mb-2 small">
+                    <strong>@r.Employee?.FullName</strong> - @r.LeaveType?.Name (@r.NumberOfDays.ToString("0.#") days)
+                    <div class="text-muted">@r.StartDate.ToString("dd MMM") to @r.EndDate.ToString("dd MMM")</div>
+                    <form asp-controller="Leave" asp-action="Approve" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-success btn-sm">&#9989; Approve</button>
+                    </form>
+                    <form asp-controller="Leave" asp-action="Reject" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-danger btn-sm">&#10060; Reject</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const labels = @Html.Raw(Json.Serialize(Model.AttendanceSummary.Keys.ToArray()));
+    const values = @Html.Raw(Json.Serialize(Model.AttendanceSummary.Values.ToArray()));
+    new Chart(document.getElementById('hrChart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#22c55e','#f59e0b','#38bdf8','#a78bfa','#ef4444','#64748b'], borderRadius: 8 }]},
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+</script>
+}

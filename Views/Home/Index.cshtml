@@ -1,8 +1,34 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
+    var isSignedIn = User.Identity!.IsAuthenticated;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero text-center mb-5">
+    <h1 class="display-5">Smart HR &amp; Payroll, made simple. &#128188;</h1>
+    <p class="lead mb-4">Track attendance, manage leaves, run payroll and download payslips - all in one place.</p>
+    @if (isSignedIn)
+    {
+        <a class="btn btn-light btn-lg me-2" asp-controller="Dashboard" asp-action="Index">&#128202; My Dashboard</a>
+        <a class="btn btn-outline-light btn-lg" asp-controller="Leave" asp-action="Index">&#127795; My Leaves</a>
+    }
+    else
+    
+    {
+        <a class="btn btn-light btn-lg me-2" asp-area="Identity" asp-page="/Account/Register">&#128640; Get Started</a>
+        <a class="btn btn-outline-light btn-lg" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    }
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#fef3c7">&#9200;</div><h5>Smart Attendance</h5><p class="text-muted mb-0">One-click check-in/out, automatic late detection, half-day rules and clean monthly history.</p></div></div>
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#dcfce7">&#127795;</div><h5>Leave Workflow</h5><p class="text-muted mb-0">Apply in seconds, manager approves in one click - balances update automatically.</p></div></div>
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#fee2e2">&#128176;</div><h5>Tested Payroll</h5><p class="text-muted mb-0">LOP, PF and pro-rata math proven by unit tests. No spreadsheets, no disputes.</p></div></div>
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#e0e7ff">&#128196;</div><h5>PDF Payslips</h5><p class="text-muted mb-0">Professional payslips generated in pure C# - download anytime.</p></div></div>
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#f3e8ff">&#128274;</div><h5>Role-Based Security</h5><p class="text-muted mb-0">Admins, Managers, HR and Employees each see exactly what they should.</p></div></div>
+    <div class="col-md-4"><div class="card feature-card p-4"><div class="icon" style="background:#cffafe">&#9881;&#65039;</div><h5>Runs Itself</h5><p class="text-muted mb-0">Background jobs mark absents nightly and email payslips monthly.</p></div></div>
+</div>
+
+<div class="text-center text-muted mb-5">
+    <h6 class="fw-bold text-dark">How it works</h6>
+    <p class="mb-0">1&#65039;&#8419; Admin onboards you &rarr; 2&#65039;&#8419; You check in &amp; apply for leaves &rarr; 3&#65039;&#8419; Payroll pays you accurately &#127881;</p>
 </div>

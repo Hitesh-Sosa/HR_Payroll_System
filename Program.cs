@@ -49,7 +49,7 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPayrollService, PayrollService>();
 builder.Services.AddScoped<PayslipPdfService>();
 builder.Services.AddScoped<RecurringJobs>();
-
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // ===== Hangfire (background jobs) =====
 builder.Services.AddHangfire(config => config
@@ -90,7 +90,7 @@ await DbSeeder.SeedAsync(
     app.Services.GetRequiredService<IServiceScopeFactory>()
 );
 
-
+app.UseStatusCodePagesWithReExecute("/Home/PageNotFound", "?code={0}");
 // ============================================
 // 7. HTTP Request Pipeline
 // ============================================

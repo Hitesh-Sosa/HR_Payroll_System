@@ -19,7 +19,6 @@ public class LeaveController : Controller
         _employeeRepository = employeeRepository;
     }
 
-    // GET /Leave — balances + history + apply form
     public async Task<IActionResult> Index()
     {
         var employee = await GetCurrentEmployeeAsync();
@@ -38,7 +37,6 @@ public class LeaveController : Controller
         return View(vm);
     }
 
-    // POST /Leave/Apply
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Apply(ApplyLeaveViewModel form)
@@ -63,50 +61,53 @@ public class LeaveController : Controller
                 form.StartDate!.Value, form.EndDate!.Value, form.Reason);
             TempData["Success"] = "Leave request submitted. Waiting for approval.";
         }
-        catch (InvalidOperationException ex)
-        {
-            TempData["Error"] = ex.Message;
-        }
+        catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
 
-        return RedirectToAction(nameof(Index));   // PRG
+        return RedirectToAction(nameof(Index));
     }
 
-    // GET /Leave/Pending — approval queue (Manager/Admin only)
-    [Authorize(Roles = "Manager,Admin")]
+    // Admin/HR: all departments • Manager: own department only
+    [Authorize(Roles = "Manager,Admin,HR")]
     public async Task<IActionResult> Pending()
     {
-        var requests = await _leaveService.GetPendingRequestsAsync();
+        var requests = await _leaveService.GetPendingRequestsAsync(await ResolveScopeAsync());
         return View(requests);
     }
 
-    // POST /Leave/Approve/5
     [HttpPost]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Manager,Admin,HR")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Approve(int id, string? remarks)
     {
         try
         {
-            await _leaveService.ApproveAsync(id, CurrentUserId(), remarks);
+            await _leaveService.ApproveAsync(id, CurrentUserId(), remarks, await ResolveScopeAsync());
             TempData["Success"] = "Approved: balance deducted + attendance marked On Leave.";
         }
         catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
         return RedirectToAction(nameof(Pending));
     }
 
-    // POST /Leave/Reject/5
     [HttpPost]
-    [Authorize(Roles = "Manager,Admin")]
+    [Authorize(Roles = "Manager,Admin,HR")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reject(int id, string? remarks)
     {
         try
         {
-            await _leaveService.RejectAsync(id, CurrentUserId(), remarks);
+            await _leaveService.RejectAsync(id, CurrentUserId(), remarks, await ResolveScopeAsync());
             TempData["Success"] = "Leave rejected (no balance change).";
         }
         catch (InvalidOperationException ex) { TempData["Error"] = ex.Message; }
         return RedirectToAction(nameof(Pending));
+    }
+
+    // null = unrestricted (Admin/HR); Manager = their department id
+    private async Task<int?> ResolveScopeAsync()
+    {
+        if (User.IsInRole("Admin") || User.IsInRole("HR")) return null;
+        var me = await GetCurrentEmployeeAsync();
+        return me?.DepartmentId;
     }
 
     private async Task<Employee?> GetCurrentEmployeeAsync()
@@ -115,6 +116,5 @@ public class LeaveController : Controller
         return await _employeeRepository.GetByUserIdAsync(userId);
     }
 
-    private string CurrentUserId()
-        => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private string CurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 }

@@ -1,0 +1,70 @@
+@model HrPayrollSystem.Models.AdminDashboardViewModel
+@{ ViewData["Title"] = "Admin Dashboard"; }
+
+<h2 class="mb-4 fw-bold">&#127970; Admin Dashboard</h2>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #4f46e5"><div class="fs-2">&#128101;</div><h3 class="mb-0 fw-bold">@Model.ActiveEmployees</h3><small class="text-muted">Active Employees</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #0ea5e9"><div class="fs-2">&#127970;</div><h3 class="mb-0 fw-bold">@Model.Departments</h3><small class="text-muted">Departments</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #f59e0b"><div class="fs-2">&#127795;</div><h3 class="mb-0 fw-bold">@Model.PendingLeaves</h3><small class="text-muted">Pending Leaves</small></div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #22c55e"><div class="fs-2">&#128176;</div><h6 class="mb-0 fw-bold">@Model.LatestMonthNetPay.ToString("N0")</h6><small class="text-muted">Net Pay - @Model.LatestMonthLabel</small></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm p-3 h-100">
+            <h6 class="fw-bold mb-2">&#128202; Attendance This Month (all employees)</h6>
+            <canvas id="attChart" height="115"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm p-3 mb-3" style="border-left:5px solid #f59e0b">
+            <h6 class="fw-bold">&#9888;&#65039; Unlinked Accounts: @Model.UnlinkedUsersCount</h6>
+            @if (Model.UnlinkedUsersCount > 0)
+            {
+                <ul class="mb-2 small text-muted">
+                    @foreach (var email in Model.UnlinkedEmails) { <li>@email</li> }
+                </ul>
+                <a class="btn btn-sm btn-gradient" asp-controller="Admin" asp-action="CreateEmployee">&#10133; Link an account</a>
+            }
+            else { <p class="text-success mb-0">&#9989; Every account is linked to an employee.</p> }
+        </div>
+        <div class="card border-0 shadow-sm p-3">
+            <h6 class="fw-bold">&#127795; Latest Leave Requests</h6>
+            @if (!Model.LatestLeaveRequests.Any()) { <p class="text-muted small mb-0">None yet.</p> }
+            <ul class="list-unstyled mb-0 small">
+                @foreach (var r in Model.LatestLeaveRequests)
+                {
+                    <li class="mb-1">@r.Employee?.FullName - @r.LeaveType?.Name (@r.NumberOfDays.ToString("0.#")d) <span class="badge bg-secondary">@r.Status</span></li>
+                }
+            </ul>
+            <a class="small" asp-controller="Leave" asp-action="Pending">Review all &rarr;</a>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm p-3">
+    <h6 class="fw-bold mb-2">&#9889; Quick Actions</h6>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-gradient" asp-controller="Admin" asp-action="CreateEmployee">&#10133; New Employee</a>
+        <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="Index">&#127970; Admin Panel</a>
+        <a class="btn btn-outline-primary" asp-controller="UserRoles" asp-action="Index">&#128101; Manage Roles</a>
+        <a class="btn btn-outline-primary" asp-controller="Payroll" asp-action="Index">&#128176; Run Payroll</a>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const labels = @Html.Raw(Json.Serialize(Model.AttendanceSummary.Keys.ToArray()));
+    const values = @Html.Raw(Json.Serialize(Model.AttendanceSummary.Values.ToArray()));
+    new Chart(document.getElementById('attChart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#22c55e','#f59e0b','#38bdf8','#a78bfa','#ef4444','#64748b'], borderRadius: 8 }]},
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+</script>
+}

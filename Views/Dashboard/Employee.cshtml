@@ -1,0 +1,102 @@
+﻿@model HrPayrollSystem.Models.EmployeeHomeViewModel
+@{ ViewData["Title"] = "My Dashboard"; }
+
+<h2 class="mb-1 fw-bold">&#128075; Hi, @Model.EmployeeName!</h2>
+<p class="text-muted">@Model.EmployeeCode &bull; @Model.DepartmentName</p>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm p-3 mb-4" style="border-top:4px solid #10b981">
+            <h6 class="fw-bold">&#9200; Today - @DateTime.Now.ToString("ddd, dd MMM yyyy")</h6>
+            @if (Model.Today == null)
+            {
+                <p class="text-muted small">You have not checked in yet.</p>
+                <form asp-controller="Employee" asp-action="CheckIn" method="post">
+                    <button class="btn btn-gradient">&#9989; Check In</button>
+                </form>
+            }
+            else if (Model.Today.CheckOut == null)
+            {
+                <p class="small">Checked in: <strong>@Model.Today.CheckIn?.ToString("HH:mm")</strong> <span class="badge bg-warning text-dark">@Model.Today.Status</span></p>
+                <form asp-controller="Employee" asp-action="CheckOut" method="post">
+                    <button class="btn btn-danger">&#127937; Check Out</button>
+                </form>
+            }
+            else
+            {
+                <p class="small mb-0">In <strong>@Model.Today.CheckIn?.ToString("HH:mm")</strong> - Out <strong>@Model.Today.CheckOut?.ToString("HH:mm")</strong> - <strong>@Model.Today.HoursWorked.ToString("0.00") hours</strong> <span class="badge bg-primary">@Model.Today.Status</span></p>
+            }
+        </div>
+
+        <div class="card border-0 shadow-sm p-3 mb-4">
+            <h6 class="fw-bold mb-2">&#127795; My Leave Balances</h6>
+            @foreach (var b in Model.Balances)
+            {
+                var pct = b.LeaveType!.AnnualQuota > 0 ? (int)(b.RemainingDays / b.LeaveType.AnnualQuota * 100) : 0;
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small"><span>@b.LeaveType?.Name</span><strong>@b.RemainingDays.ToString("0.#") / @b.LeaveType.AnnualQuota</strong></div>
+                    <div class="progress" style="height:8px"><div class="progress-bar bg-success" style="width:@(pct)%"></div></div>
+                </div>
+            }
+            <a class="small" asp-controller="Leave" asp-action="Index">Apply for leave &rarr;</a>
+        </div>
+
+        <div class="card border-0 shadow-sm p-3">
+            <h6 class="fw-bold mb-2">&#128197; Upcoming Holidays</h6>
+            @if (!Model.UpcomingHolidays.Any()) { <p class="text-muted small mb-0">None scheduled.</p> }
+            <ul class="list-unstyled mb-0 small">
+                @foreach (var h in Model.UpcomingHolidays) { <li>&#127881; <strong>@h.Date.ToString("dd MMM (ddd)")</strong> - @h.Name</li> }
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm p-3 mb-4">
+            <h6 class="fw-bold mb-2">&#128202; This Month Summary</h6>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var kv in Model.MonthSummary)
+                {
+                    <span class="badge bg-secondary p-2">@kv.Key: <strong>@kv.Value</strong></span>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-3 mb-4" style="border-left:5px solid #22c55e">
+            <h6 class="fw-bold">&#128196; Latest Payslip</h6>
+            @if (Model.LatestPayslip == null)
+            {
+                <p class="text-muted small mb-0">No payslips yet - they appear after payroll runs.</p>
+            }
+            else
+            {
+                var p = Model.LatestPayslip;
+                <p class="mb-1 small">
+                    <strong>@(new DateTime(p.Year, p.Month, 1).ToString("MMMM yyyy"))</strong> -
+                    Net Pay: <strong class="text-success">@p.NetPay.ToString("N2")</strong>
+                </p>
+                <div>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="Payroll" asp-action="Details" asp-route-id="@p.Id">View</a>
+                    <a class="btn btn-sm btn-primary" asp-controller="Payroll" asp-action="DownloadPdf" asp-route-id="@p.Id">&#11015;&#65039; PDF</a>
+                </div>
+            }
+            <a class="small mt-2 d-block" asp-controller="Payroll" asp-action="MyPayslips">All my payslips &rarr;</a>
+        </div>
+
+        <div class="card border-0 shadow-sm p-3">
+            <h6 class="fw-bold mb-2">&#128197; This Month's Attendance</h6>
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Date</th><th>Status</th></tr></thead>
+                <tbody>
+                    @if (!Model.MonthlyAttendance.Any()) { <tr><td colspan="2" class="text-muted small">No records yet.</td></tr> }
+                    @foreach (var a in Model.MonthlyAttendance)
+                    {
+                        <tr><td>@a.Date.ToString("dd MMM (ddd)")</td><td><span class="badge bg-primary">@a.Status</span></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

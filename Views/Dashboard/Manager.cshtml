@@ -1,0 +1,74 @@
+﻿@model HrPayrollSystem.Models.ManagerDashboardViewModel
+@{ ViewData["Title"] = "Manager Dashboard"; }
+
+<h2 class="mb-1 fw-bold">&#128104;&#8205;&#128188; Manager Dashboard</h2>
+<p class="text-muted">Welcome, @Model.ManagerName - Department: <strong>@Model.DepartmentName</strong></p>
+
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+@if (!Model.HasDepartment)
+{
+    <div class="alert alert-warning">&#9888;&#65039; You are not assigned to a department yet. Ask the Admin: <strong>Admin Panel &rarr; Edit</strong> your employee profile.</div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #4f46e5"><div class="fs-2">&#128101;</div><h3 class="mb-0 fw-bold">@Model.TeamHeadcount</h3><small class="text-muted">My Team</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #22c55e"><div class="fs-2">&#9989;</div><h3 class="mb-0 fw-bold">@Model.PresentToday</h3><small class="text-muted">Present Today</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #f59e0b"><div class="fs-2">&#127795;</div><h3 class="mb-0 fw-bold">@Model.PendingLeaves</h3><small class="text-muted">Pending (My Dept)</small></div></div>
+        <div class="col-6 col-md-3"><div class="card border-0 shadow-sm stat-card p-3" style="border-top:4px solid #0ea5e9">
+            <div class="fs-2">&#9200;</div>
+            @if (Model.MyToday == null) { <span class="text-muted small">Not checked in</span> }
+            else { <strong class="small">@Model.MyToday.CheckIn?.ToString("HH:mm") <span class="badge bg-secondary">@Model.MyToday.Status</span></strong> }
+            <small class="text-muted d-block">My Today</small>
+        </div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-3 mb-4">
+                <h6 class="fw-bold mb-2">&#127795; Pending Leaves - MY DEPARTMENT</h6>
+                @if (!Model.PendingTeamLeaves.Any()) { <p class="text-muted small mb-0">No pending requests. All clear!</p> }
+                @foreach (var r in Model.PendingTeamLeaves)
+                {
+                    <div class="border-bottom pb-2 mb-2 small">
+                        <strong>@r.Employee?.FullName</strong> - @r.LeaveType?.Name (@r.NumberOfDays.ToString("0.#")d)
+                        <div class="text-muted">@r.StartDate.ToString("dd MMM") to @r.EndDate.ToString("dd MMM") - @r.Reason</div>
+                        <form asp-controller="Leave" asp-action="Approve" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button class="btn btn-success btn-sm">&#9989; Approve</button>
+                        </form>
+                        <form asp-controller="Leave" asp-action="Reject" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button class="btn btn-danger btn-sm">&#10060; Reject</button>
+                        </form>
+                    </div>
+                }
+                <a class="small" asp-controller="Leave" asp-action="Pending">Open full approval queue &rarr;</a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-3 mb-4">
+                <h6 class="fw-bold mb-2">&#128101; My Team Today</h6>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Member</th><th>Status Today</th></tr></thead>
+                    <tbody>
+                        @foreach (var t in Model.TeamToday)
+                        {
+                            <tr><td>@t.Name <small class="text-muted">(@t.Code)</small></td>
+                                <td>@if (t.Status == null) { <span class="badge bg-secondary">No record</span> } else { <span class="badge bg-primary">@t.Status</span> }</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card border-0 shadow-sm p-3">
+                <h6 class="fw-bold mb-2">&#127795; My Leave Balances</h6>
+                @foreach (var b in Model.MyBalances)
+                {
+                    <div class="d-flex justify-content-between small"><span>@b.LeaveType?.Name</span><strong>@b.RemainingDays.ToString("0.#") left</strong></div>
+                }
+            </div>
+        </div>
+    </div>
+}

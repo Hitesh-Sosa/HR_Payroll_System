@@ -1,0 +1,59 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-gradient-brand text-white text-center py-3">
+                <h4 class="mb-0">🏢 Create your account</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label fw-semibold">Email</label>
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="you@company.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.SelectedRole" class="form-label fw-semibold">Register as</label>
+                        <select asp-for="Input.SelectedRole" class="form-select">
+                            <option value="Employee">👤 Employee — attendance, leaves, my payslips</option>
+                            <option value="Manager">🧑‍💼 Manager — also approves team leaves</option>
+                            <option value="HR">🗂️ HR — reserved (works like employee for now)</option>
+                        </select>
+                        <span asp-validation-for="Input.SelectedRole" class="text-danger small"></span>
+                        <div class="form-text">🔒 Admin accounts are assigned only by an existing Admin (Manage Roles).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label fw-semibold">Password</label>
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        <div class="form-text">Min 8 chars, with uppercase + lowercase + digit + symbol.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">Confirm password</label>
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-gradient w-100 btn-lg">🚀 Register</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Log in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
